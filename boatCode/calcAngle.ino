@@ -10,7 +10,7 @@ int calcAngle(double boatX, double boatY, double targetX, double targetY, int he
     
     // https://www.igismap.com/formula-to-find-bearing-or-heading-angle-between-two-points-latitude-longitude/
     double dx = std::cos(targetX * radConvert) * std::sin((targetY - boatY) * radConvert);
-    double dy = std::cos(boatX * radConvert) * std::sin(targetX * radConvert) - std::sin(boatX * radConvert) * cos(targetX * radConvert) * cos((targetY - boatY) * radConvert);
+    double dy = std::cos(boatX * radConvert) * std::sin(targetX * radConvert) - std::sin(boatX * radConvert) * std::cos(targetX * radConvert) * std::cos((targetY - boatY) * radConvert);
     
     std::cout << dx << "\n";
     std::cout << dy << "\n";
