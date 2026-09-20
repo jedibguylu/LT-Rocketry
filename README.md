@@ -11,3 +11,5 @@ Steps to getting stuff to production:
 2. Write it and make sure it compiles (Use codeHS or https://app.arduino.cc/  to check if it compiles)
 3. Make a new project branch (or continue one) and upload your file
 4. Tell tech lead you need a merge approved
+
+***If you come across a problem you can't immediately resolve, create a new issue post so everyone can view and help.
