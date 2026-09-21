@@ -8,6 +8,7 @@ double calcDist(double boatX, double boatY, double targetX, double targetY){
     return distance;
 }
 
+/**
 int main()
 {
     std::cout << calcDist(0, 0, 0.5, std::sqrt(3)/2);
