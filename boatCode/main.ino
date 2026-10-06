@@ -14,10 +14,10 @@ SoftwareSerial gpsSerial(GRX, GTX); //Serial connection to device
 HMC5883L compass;
 
 //Motor Controller Setup
-static const int Left1 = 8; //left and right dont mean anything until we connect them
-static const int Left2 = 7;
-static const int Right1 = 6;
-static const int Right2 = 5;
+static const int in1Pin = D8;
+static const int in2Pin = D7;
+static const int in3Pin = D6;
+static const int in4Pin = D5;
 
 void setup() {
   Serial.begin(9600);
@@ -30,10 +30,10 @@ void setup() {
   compass.setMeasurementMode(MEASUREMENT_CONTINUOUS);
 
   //Motor Controller
-  pinMode(Left1, OUTPUT);
-  pinMode(Left2, OUTPUT);
-  pinMode(Right1, OUTPUT);
-  pinMode(Right2, OUTPUT);
+  PinMode(in1Pin, OUTPUT);  
+  PinMode(in2Pin, OUTPUT);   
+  PinMode(in3Pin, OUTPUT);   
+  PinMode(in4Pin, OUTPUT);   
 }
 
 void loop() {
