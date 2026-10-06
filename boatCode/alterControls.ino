@@ -1,11 +1,28 @@
-void alterControls(){
-  /**
-  Using the differental thrusters, the code should increase left or right motor respectively to swing the nose
-  in the direction of calcAngle() until that angle is 0.
+void alterControls(angle, distance){
+  if (distance > 0){ 
+      if (angle<0) {
+          DitgalWrite(D6, HIGH);
+          DitgalWrite(D5, LOW);
+          DitgalWrite(D8, LOW);
+          DitgalWrite(D7,LOW);
+      } else if (angle>0) {
+          DitgalWrite(D8, HIGH);
+          DitgalWrite(D7,LOW);
+          DitgalWrite(D6, LOW);
+          DitgalWrite(D5, LOW);
+      } else {
+          DitgalWrite(D8, HIGH);
+          DitgalWrite(D7, LOW);
+          DitgalWrite(D6, HIGH);
+          DitgalWrite(D5, LOW);
+      }
+  } else {
+      DitgalWrite(D8, LOW);
+      DitgalWrite(D7, LOW);
+      DitgalWrite(D6, LOW);
+      DitgalWrite(D5, LOW);
+  }
   
-  The code should also keep going until the boat gets to the point with calcDist() == 0.
-  Maybe it should also slow down when getting near the point and there should be some tolerances (whatever the GPS datasheet
-  says the minimum tolerance is is what we should use or itll just spin around the point it cant get to)
-  Maybe just have it run-ashore idk.
-  **/
+  return 0;
 }
+
