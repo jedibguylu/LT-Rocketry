@@ -1,5 +1,7 @@
+#include <cmath>
+
 void alterControls(int angle, int distance){
-  if (distance > 0){ 
+  if (std::abs(distance) > 0){ 
       if (angle<0) {
           DitgalWrite(D6, HIGH);
           DitgalWrite(D5, LOW);
