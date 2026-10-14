@@ -3,6 +3,9 @@
 #include <string>
 #include <numbers>
 
+//TARGET COORDINATES
+std::vector<double> targetPoint = {0, 0};
+
 //GPS Setup - https://randomnerdtutorials.com/guide-to-neo-6m-gps-module-with-arduino/
 #include <TinyGPS++.h> //when importing its just called TinyGPSPlus by Mikal Hart
 #include <SoftwareSerial.h>
@@ -92,5 +95,12 @@ void setup() {
 }
 
 void loop() {
-  //all the functions go in here
+  std::vector<double> currentPoint = getCoords();
+  int currentHeading = getHeading();
+  int angle = calcAngle(currentPoint[0], currentPoint[1], targetPoint[0], targetPoint[1], currentHeading);
+  double distance = calcDist(currentPoint[0], currentPoint[1], targetPoint[0], targetPoint[1]);
+  int controlStatus = alterControls(angle, distance);
+  storeData(gps.time.value(), currentPoint, distance, currentHeading, angle, controlStatus, fileName);
+  
+  delay(100);
 }
