@@ -19,6 +19,30 @@ static const int in2Pin = D7;
 static const int in3Pin = D6;
 static const int in4Pin = D5;
 
+void alterControls(int angle, int distance){
+  return 0;
+}
+
+int calcAngle(double boatX, double boatY, double targetX, double targetY, int heading) {
+  return difference;
+}
+
+double calcDist(double boatX, double boatY, double targetX, double targetY){
+  return distance;
+}
+
+std::vector<int> getCoords() {
+ return point; //array
+}
+
+void getHeading() {
+ ...
+}
+
+void storeData() {
+ ...
+?
+
 void setup() {
   Serial.begin(9600);
 
