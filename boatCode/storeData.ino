@@ -24,4 +24,6 @@ void storeData(int time, std::vector<double> coords, double distance, int headin
 	} else {
 		Serial.println("Error opening file for writing!");
 	}
+
+	return 0;
 }
