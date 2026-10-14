@@ -1,4 +1,4 @@
-void storeData(int time, std::vector<double> coords, double distance, int heading, int angle, int turn status, File file, String name){
+void storeData(int time, std::vector<double> coords, double distance, int heading, int angle, int turn status, String name){
   String dataString = "";
   dataString += time;
   dataString += " [Coords: ";
@@ -14,7 +14,7 @@ void storeData(int time, std::vector<double> coords, double distance, int headin
   dataString += " deg diff | Turn satus: ";
   dataString += status;
 
-  File file = SD.open(name, FILE_WRITE);
+  File dataFile = SD.open(name, FILE_WRITE);
 
 	if (dataFile) {
 		dataFile.println(dataString);
