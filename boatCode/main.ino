@@ -1,3 +1,8 @@
+#include <cmath>
+#include <iostream>
+#include <string>
+#include <numbers>
+
 //GPS Setup - https://randomnerdtutorials.com/guide-to-neo-6m-gps-module-with-arduino/
 #include <TinyGPS++.h> //when importing its just called TinyGPSPlus by Mikal Hart
 #include <SoftwareSerial.h>
