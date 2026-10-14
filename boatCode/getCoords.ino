@@ -1,5 +1,5 @@
-std::vector<int> getCoords() {
-  std::vector<int> point; 
+std::vector<double> getCoords() {
+  std::vector<double> point; 
   double lat, lon;
   
   if  (gps.location.isUpdated()) {
