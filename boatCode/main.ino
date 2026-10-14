@@ -19,6 +19,14 @@ static const int in2Pin = D7;
 static const int in3Pin = D6;
 static const int in4Pin = D5;
 
+//SD Writer Setup
+#include <SPI.h>
+#include <SD.h>
+
+const char* fileName = "log.csv"
+
+//--------------------------------------------------------------
+
 void alterControls(int angle, int distance){
   return 0;
 }
@@ -31,7 +39,7 @@ double calcDist(double boatX, double boatY, double targetX, double targetY){
   return distance;
 }
 
-std::vector<int> getCoords() {
+std::vector<double> getCoords() {
  return point; //array
 }
 
@@ -39,13 +47,15 @@ void getHeading() {
  ...
 }
 
-void storeData() {
- ...
+void storeData(int time, std::vector<double> coords, double distance, int heading, int angle, int turn status, File file, String name){
+ return 0;
 ?
 
 void setup() {
   Serial.begin(9600);
-
+  while (!Serial) {
+    ;
+  }
   //GPS
   gpsSerial.begin(9600);
 
@@ -57,7 +67,23 @@ void setup() {
   PinMode(in1Pin, OUTPUT);  
   PinMode(in2Pin, OUTPUT);   
   PinMode(in3Pin, OUTPUT);   
-  PinMode(in4Pin, OUTPUT);   
+  PinMode(in4Pin, OUTPUT);
+
+  //SD Writer
+  if (!SD.begin(chipSelect)) {
+		Serial.println("Initialization failed! Check connections or SD card.");
+		while (true); // Halt execution
+	}
+	Serial.println("SD card initialized successfully.");
+
+	if (!SD.exists(fileName)) { // Write CSV header row if the file doesn't exist yet
+		File dataFile = SD.open(fileName, FILE_WRITE);
+		if (dataFile) {
+			dataFile.println("Log Created");
+			dataFile.close();
+			Serial.println("New log created.");
+		}
+	}
 }
 
 void loop() {
