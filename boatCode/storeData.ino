@@ -28,6 +28,5 @@ void storeData(int time, Point coords, double distance, int heading, int angle, 
     Serial.println(dataString);
   }
   
-
 	return 0;
 }
