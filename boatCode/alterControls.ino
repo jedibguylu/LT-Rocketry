@@ -1,5 +1,5 @@
 int alterControls(int angle, double distance){
-  if (abs(distance) > 0.00001){ //should be ~1m
+  if (abs(distance) > 1){ //should be ~1m
       if (angle < 0 && abs(angle) > 5) {
           digitalWrite(6, HIGH);
           digitalWrite(5, LOW);
