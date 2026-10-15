@@ -1,12 +1,15 @@
-std::vector<double> getCoords() {
-  double lat, lon;
+Point getCoords() {
+  Point p;
   
-  if  (gps.location.isUpdated()) {
-    lat = gps.location.lat();
-    lon = gps.location.lng();
+  if (!testMode){
+    if (gps.location.isUpdated()) {
+    p.lat = gps.location.lat();
+    p.lng = gps.location.lng();
+    }
+  } else {
+    p.lat = testBoat.lat;
+    p.lng = testBoat.lng;
   }
-
-  std::vector<double> point = {lat, lon};
   
-  return point;
+  return p;
 }
