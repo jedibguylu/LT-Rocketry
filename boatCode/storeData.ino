@@ -1,10 +1,10 @@
-void storeData(int time, std::vector<double> coords, double distance, int heading, int angle, int turn status, String name){
+void storeData(int time, Point coords, double distance, int heading, int angle, int turnStatus, String name){
   String dataString = "";
   dataString += time;
   dataString += " [Coords: ";
-  dataString += coords[0];
+  dataString += coords.lat;
   dataString += " deg, ";
-  dataString += coords[1];
+  dataString += coords.lng;
   dataString += " deg | Dist: ";
   dataString += distance;
   dataString += " (unk)| Heading: ";
@@ -12,18 +12,22 @@ void storeData(int time, std::vector<double> coords, double distance, int headin
   dataString += "deg | Angle: ";
   dataString += angle;
   dataString += " deg diff | Turn satus: ";
-  dataString += status;
+  dataString += turnStatus;
 
-  File dataFile = SD.open(name, FILE_WRITE);
+  if (!testMode){
+    File dataFile = SD.open(name, FILE_WRITE);
 
-	if (dataFile) {
-		dataFile.println(dataString);
-		dataFile.close(); // Closing flushes data to physical storage
-
-		Serial.print("Log Successful");
-	} else {
-		Serial.println("Error opening file for writing!");
-	}
+    if (dataFile) {
+      dataFile.println(dataString);
+      dataFile.close(); // Closing flushes data to physical storage
+      Serial.println(dataString);
+    } else {
+      Serial.println("Error opening file for writing!");
+    }
+  } else {
+    Serial.println(dataString);
+  }
+  
 
 	return 0;
 }
