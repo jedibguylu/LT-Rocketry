@@ -1,10 +1,7 @@
-int calcAngle(double boatX, double boatY, double targetX, double targetY, int heading) {
-    double radConvert = 3.14159 / 180.0; //from deg to rad
-    double degConvert = 180.0 / 3.14159; //from rad to deg
-    
+int calcAngle(double boatLat, double boatLon, double targetLat, double targetLon, int heading) {
     // https://www.igismap.com/formula-to-find-bearing-or-heading-angle-between-two-points-latitude-longitude/
-    double dx = cos(targetX * radConvert) * sin((targetY - boatY) * radConvert);
-    double dy = cos(boatX * radConvert) * sin(targetX * radConvert) - sin(boatX * radConvert) * cos(targetX * radConvert) * cos((targetY - boatY) * radConvert);
+    double dx = cos(targetLat * radConvert) * sin((targetLon - boatLon) * radConvert);
+    double dy = cos(boatLat * radConvert) * sin(targetLat * radConvert) - sin(boatLat * radConvert) * cos(targetLat * radConvert) * cos((targetLon - boatLon) * radConvert);
     
     //cout << dx << "\n";
     //cout << dy << "\n";
