@@ -11,12 +11,16 @@ struct Point {
 };
 
 //TARGET COORDINATES
-Point targetPoint = {0.0, 0.0};
+Point targetPoint = {41.9603426312413, -87.63466132170615}; //Chicago
 //-------------TESTING VARIABLES----------------
 const bool testMode = true;
-Point testBoat = {0.0, 0.0};
+Point testBoat = {41.82830311848214, -86.70505674169225}; //New Buffalo
 int testHeading = 360;
 //----------------------------------------------
+//Math Variables
+const double radConvert = 3.14159 / 180.0; //from deg to rad
+const double degConvert = 180.0 / 3.14159; //from rad to deg
+const double R = 6371000.0; // Earths radius in meters
 
 //GPS Setup - https://randomnerdtutorials.com/guide-to-neo-6m-gps-module-with-arduino/
 static const int GRX = 4, GTX = 3; //TX pin on module is 4, RX pin on module is 3
@@ -40,7 +44,7 @@ const int chipSelect = 10;
 const char* fileName = "log.csv";
 
 int alterControls(int angle, double distance){
-  if (abs(distance) > 0.00001){ //should be ~1m
+  if (abs(distance) > 1){ //should be ~1m
       if (angle < 0 && abs(angle) > 5) {
           digitalWrite(6, HIGH);
           digitalWrite(5, LOW);
@@ -69,13 +73,10 @@ int alterControls(int angle, double distance){
   }
 }
 
-int calcAngle(double boatX, double boatY, double targetX, double targetY, int heading) {
-    double radConvert = 3.14159 / 180.0; //from deg to rad
-    double degConvert = 180.0 / 3.14159; //from rad to deg
-    
+int calcAngle(double boatLat, double boatLon, double targetLat, double targetLon, int heading) {
     // https://www.igismap.com/formula-to-find-bearing-or-heading-angle-between-two-points-latitude-longitude/
-    double dx = cos(targetX * radConvert) * sin((targetY - boatY) * radConvert);
-    double dy = cos(boatX * radConvert) * sin(targetX * radConvert) - sin(boatX * radConvert) * cos(targetX * radConvert) * cos((targetY - boatY) * radConvert);
+    double dx = cos(targetLat * radConvert) * sin((targetLon - boatLon) * radConvert);
+    double dy = cos(boatLat * radConvert) * sin(targetLat * radConvert) - sin(boatLat * radConvert) * cos(targetLat * radConvert) * cos((targetLon - boatLon) * radConvert);
     
     //cout << dx << "\n";
     //cout << dy << "\n";
@@ -98,11 +99,20 @@ int calcAngle(double boatX, double boatY, double targetX, double targetY, int he
     return difference;
 }
 
-double calcDist(double boatX, double boatY, double targetX, double targetY){
-    double xDist = targetX - boatX;
-    double yDist = targetY - boatY;
-    double distance = sqrt((xDist * xDist) + (yDist * yDist));
-    return distance;
+double calcDist(double boatLat, double boatLon, double targetLat, double targetLon){
+    double lat1 = boatLat * radConvert;
+    double lat2 = targetLat * radConvert;
+    double dLat = (targetLat - boatLat) * radConvert;
+    double dLon = (targetLon - boatLon) * radConvert;
+
+    // Haversine calculation
+    double a = sin(dLat / 2.0) * sin(dLat / 2.0) +
+               cos(lat1) * cos(lat2) *
+               sin(dLon / 2.0) * sin(dLon / 2.0);
+               
+    double c = 2.0 * atan2(sqrt(a), sqrt(1.0 - a));
+
+    return R * c; // Distance in meters
 }
 
 Point getCoords() {
@@ -134,7 +144,7 @@ void storeData(int time, Point coords, double distance, int heading, int angle, 
   dataString += coords.lng;
   dataString += " deg | Dist: ";
   dataString += distance;
-  dataString += " (unk)| Heading: ";
+  dataString += " meters| Heading: ";
   dataString += heading;
   dataString += "deg | Angle: ";
   dataString += angle;
@@ -155,7 +165,6 @@ void storeData(int time, Point coords, double distance, int heading, int angle, 
     Serial.println(dataString);
   }
   
-
 	return 0;
 }
 
