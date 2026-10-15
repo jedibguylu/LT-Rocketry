@@ -1,32 +1,29 @@
-#include <cmath>
-
 int alterControls(int angle, double distance){
-  if (std::abs(distance) > 0.00001){ //should be ~1m
-      if (angle < 0 && std::abs(angle) > 5) {
-          DitgalWrite(D6, HIGH);
-          DitgalWrite(D5, LOW);
-          DitgalWrite(D8, LOW);
-          DitgalWrite(D7,LOW);
+  if (abs(distance) > 0.00001){ //should be ~1m
+      if (angle < 0 && abs(angle) > 5) {
+          digitalWrite(6, HIGH);
+          digitalWrite(5, LOW);
+          digitalWrite(8, LOW);
+          digitalWrite(7,LOW);
           return -1;
-      } else if (angle > 0 && std::abs(angle) > 5) {
-          DitgalWrite(D8, HIGH);
-          DitgalWrite(D7,LOW);
-          DitgalWrite(D6, LOW);
-          DitgalWrite(D5, LOW);
+      } else if (angle > 0 && abs(angle) > 5) {
+          digitalWrite(8, HIGH);
+          digitalWrite(7,LOW);
+          digitalWrite(6, LOW);
+          digitalWrite(5, LOW);
           return 1;
       } else {
-          DitgalWrite(D8, HIGH);
-          DitgalWrite(D7, LOW);
-          DitgalWrite(D6, HIGH);
-          DitgalWrite(D5, LOW);
+          digitalWrite(8, HIGH);
+          digitalWrite(7, LOW);
+          digitalWrite(6, HIGH);
+          digitalWrite(5, LOW);
           return 0;
       }
   } else {
-      DitgalWrite(D8, LOW);
-      DitgalWrite(D7, LOW);
-      DitgalWrite(D6, LOW);
-      DitgalWrite(D5, LOW);
+      digitalWrite(8, LOW);
+      digitalWrite(7, LOW);
+      digitalWrite(6, LOW);
+      digitalWrite(5, LOW);
       return 0;
   }
 }
-
