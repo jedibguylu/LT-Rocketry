@@ -223,7 +223,9 @@ void setup() {
   Serial.println("Boot complete.");
 
   Serial.println("Holding for altitude...");
-  altitudeLimiter();
+  if(!testMode){
+	  altitudeLimiter();
+  }
   Serial.println("Loop conditions met. Starting main loop.");
 }
 
