@@ -1,15 +1,28 @@
-#include <cmath>
-#include <iostream>
-#include <string>
-#include <numbers>
+#include <TinyGPS++.h>
+#include <SoftwareSerial.h>
+#include <HMC5883L.h>
+#include <Wire.h>
+#include <SPI.h>
+#include <SD.h>
+
+struct Point {
+  double lat;
+  double lng;
+};
 
 //TARGET COORDINATES
-std::vector<double> targetPoint = {0, 0};
+Point targetPoint = {41.9603426312413, -87.63466132170615}; //Chicago
+//-------------TESTING VARIABLES----------------
+const bool testMode = true;
+Point testBoat = {41.82830311848214, -86.70505674169225}; //New Buffalo
+int testHeading = 360;
+//----------------------------------------------
+//Math Variables
+const double radConvert = 3.14159 / 180.0; //from deg to rad
+const double degConvert = 180.0 / 3.14159; //from rad to deg
+const double R = 6371000.0; // Earths radius in meters
 
 //GPS Setup - https://randomnerdtutorials.com/guide-to-neo-6m-gps-module-with-arduino/
-#include <TinyGPS++.h> //when importing its just called TinyGPSPlus by Mikal Hart
-#include <SoftwareSerial.h>
-
 static const int GRX = 4, GTX = 3; //TX pin on module is 4, RX pin on module is 3
 
 TinyGPSPlus gps;
@@ -17,90 +30,216 @@ SoftwareSerial gpsSerial(GRX, GTX); //Serial connection to device
 
 //Compass Setup - https://projecthub.arduino.cc/mircemk/arduino-analog-digital-compass-with-hmc5883l-sensor-3ab86f
 #include <HMC5883L.h> //when importing its called Grove_3Axis_Digital_Compass_HMC5883L
-#include <Wire.h>
+//#include <Wire.h>
 
 HMC5883L compass;
 
 //Motor Controller Setup
-static const int in1Pin = D8;
-static const int in2Pin = D7;
-static const int in3Pin = D6;
-static const int in4Pin = D5;
+static const int in1Pin = 8, in2Pin = 7, in3Pin = 6, in4Pin = 5;
 
 //SD Writer Setup
-#include <SPI.h>
+//#include <SPI.h>
 #include <SD.h>
+const int chipSelect = 10;
+const char* fileName = "log.csv";
 
-const char* fileName = "log.csv"
-
-//--------------------------------------------------------------
-
-void alterControls(int angle, int distance){
-  return 0;
+int alterControls(int angle, double distance){
+  if (abs(distance) > 1){ //should be ~1m
+      if (angle < 0 && abs(angle) > 5) {
+          digitalWrite(6, HIGH);
+          digitalWrite(5, LOW);
+          digitalWrite(8, LOW);
+          digitalWrite(7,LOW);
+          return -1;
+      } else if (angle > 0 && abs(angle) > 5) {
+          digitalWrite(8, HIGH);
+          digitalWrite(7,LOW);
+          digitalWrite(6, LOW);
+          digitalWrite(5, LOW);
+          return 1;
+      } else {
+          digitalWrite(8, HIGH);
+          digitalWrite(7, LOW);
+          digitalWrite(6, HIGH);
+          digitalWrite(5, LOW);
+          return 0;
+      }
+  } else {
+      digitalWrite(8, LOW);
+      digitalWrite(7, LOW);
+      digitalWrite(6, LOW);
+      digitalWrite(5, LOW);
+      return 0;
+  }
 }
 
-int calcAngle(double boatX, double boatY, double targetX, double targetY, int heading) {
-  return difference;
+int calcAngle(double boatLat, double boatLon, double targetLat, double targetLon, int heading) {
+    // https://www.igismap.com/formula-to-find-bearing-or-heading-angle-between-two-points-latitude-longitude/
+    double dx = cos(targetLat * radConvert) * sin((targetLon - boatLon) * radConvert);
+    double dy = cos(boatLat * radConvert) * sin(targetLat * radConvert) - sin(boatLat * radConvert) * cos(targetLat * radConvert) * cos((targetLon - boatLon) * radConvert);
+    
+    //cout << dx << "\n";
+    //cout << dy << "\n";
+
+    // Calculate angle using atan2(y, x)
+    double bearing = atan2(dx, dy) * degConvert;
+    
+    //cout << bearing << "\n";
+
+    // Normalize bearing to [0, 360)
+    int course = static_cast<int>(fmod(bearing + 360.0, 360.0));
+
+    //cout << course << "\n";
+
+    // Calculate turn difference relative to current heading (-180 to +180)
+    int difference = course - heading;
+    while (difference > 180)  difference -= 360;
+    while (difference < -180) difference += 360;
+
+    return difference;
 }
 
-double calcDist(double boatX, double boatY, double targetX, double targetY){
-  return distance;
+double calcDist(double boatLat, double boatLon, double targetLat, double targetLon){
+    double lat1 = boatLat * radConvert;
+    double lat2 = targetLat * radConvert;
+    double dLat = (targetLat - boatLat) * radConvert;
+    double dLon = (targetLon - boatLon) * radConvert;
+
+    // Haversine calculation
+    double a = sin(dLat / 2.0) * sin(dLat / 2.0) +
+               cos(lat1) * cos(lat2) *
+               sin(dLon / 2.0) * sin(dLon / 2.0);
+               
+    double c = 2.0 * atan2(sqrt(a), sqrt(1.0 - a));
+
+    return R * c; // Distance in meters
 }
 
-std::vector<double> getCoords() {
- return point; //array
+Point getCoords() {
+  Point p;
+  
+  if (!testMode){
+    if (gps.location.isUpdated()) {
+    p.lat = gps.location.lat();
+    p.lng = gps.location.lng();
+    }
+  } else {
+    p.lat = testBoat.lat;
+    p.lng = testBoat.lng;
+  }
+  
+  return p;
 }
 
-void getHeading() {
- ...
+int getHeading() {
+ return testHeading;
 }
 
-void storeData(int time, std::vector<double> coords, double distance, int heading, int angle, int turn status, File file, String name){
- return 0;
-?
+void storeData(int time, Point coords, double distance, int heading, int angle, int turnStatus, String name){
+  String dataString = "";
+  dataString += time;
+  dataString += " [Coords: ";
+  dataString += coords.lat;
+  dataString += " deg, ";
+  dataString += coords.lng;
+  dataString += " deg | Dist: ";
+  dataString += distance;
+  dataString += " meters| Heading: ";
+  dataString += heading;
+  dataString += "deg | Angle: ";
+  dataString += angle;
+  dataString += " deg diff | Turn satus: ";
+  dataString += turnStatus;
+
+  if (!testMode){
+    File dataFile = SD.open(name, FILE_WRITE);
+
+    if (dataFile) {
+      dataFile.println(dataString);
+      dataFile.close(); // Closing flushes data to physical storage
+      Serial.println(dataString);
+    } else {
+      Serial.println("Error opening file for writing!");
+    }
+  } else {
+    Serial.println(dataString);
+  }
+  
+	return 0;
+}
+
+void altitudeLimiter(){
+  delay(600000); //10 min
+  int groundlvl = gps.altitude.meters();
+  
+  while (gps.altitude.meters() < gps.altitude.meters() + 30){
+    delay(500);
+  }
+
+  while (gps.altitude.meters() > gps.altitude.meters() + 5){
+    delay(500);
+  }
+
+  delay(60000); //1 min
+}
 
 void setup() {
   Serial.begin(9600);
-  while (!Serial) {
-    ;
-  }
+  delay(1000);
+
+  Serial.println("Booting...");
   //GPS
   gpsSerial.begin(9600);
-
+  Serial.println("GPS Initialized");
   //Compass
   Wire.begin(); //Initializes I2C Compass Pins
   compass.setMeasurementMode(MEASUREMENT_CONTINUOUS);
+  Serial.println("Compass Initialized");
 
   //Motor Controller
-  PinMode(in1Pin, OUTPUT);  
-  PinMode(in2Pin, OUTPUT);   
-  PinMode(in3Pin, OUTPUT);   
-  PinMode(in4Pin, OUTPUT);
+  pinMode(in1Pin, OUTPUT);  
+  pinMode(in2Pin, OUTPUT);   
+  pinMode(in3Pin, OUTPUT);   
+  pinMode(in4Pin, OUTPUT);
+  Serial.println("Motors Initialized");
 
   //SD Writer
-  if (!SD.begin(chipSelect)) {
-		Serial.println("Initialization failed! Check connections or SD card.");
-		while (true); // Halt execution
-	}
-	Serial.println("SD card initialized successfully.");
+  if (!testMode){
+    if (!SD.begin(chipSelect)) {
+      Serial.println(F("SD Card initialization failed!"));
+      while(!SD.begin(chipSelect)){}
+    } else {
+      Serial.println(F("SD Card initialized."));
+      if (!SD.exists(fileName)) {
+        File dataFile = SD.open(fileName, FILE_WRITE);
+        if (dataFile) {
+          dataFile.println("Log Created");
+          dataFile.close();
+          Serial.println(F("New log created."));
+        }
+      }
+    }
+  }
+  Serial.println("Boot complete.");
 
-	if (!SD.exists(fileName)) { // Write CSV header row if the file doesn't exist yet
-		File dataFile = SD.open(fileName, FILE_WRITE);
-		if (dataFile) {
-			dataFile.println("Log Created");
-			dataFile.close();
-			Serial.println("New log created.");
-		}
-	}
+  Serial.println("Holding for altitude...");
+  altitudeLimiter();
+  Serial.println("Loop conditions met. Starting main loop.");
 }
 
 void loop() {
-  std::vector<double> currentPoint = getCoords();
+  int time = 0;
+  if (!testMode) {
+    time = gps.time.value();
+  } else {
+    time = 6767;
+  }
+  Point boatPoint = getCoords();
   int currentHeading = getHeading();
-  int angle = calcAngle(currentPoint[0], currentPoint[1], targetPoint[0], targetPoint[1], currentHeading);
-  double distance = calcDist(currentPoint[0], currentPoint[1], targetPoint[0], targetPoint[1]);
+  int angle = calcAngle(boatPoint.lat, boatPoint.lng, targetPoint.lat, targetPoint.lng, currentHeading);
+  double distance = calcDist(boatPoint.lat, boatPoint.lng, targetPoint.lat, targetPoint.lng);
   int controlStatus = alterControls(angle, distance);
-  storeData(gps.time.value(), currentPoint, distance, currentHeading, angle, controlStatus, fileName);
+  storeData(time, boatPoint, distance, currentHeading, angle, controlStatus, fileName);
   
-  delay(100);
+  delay(500);
 }
