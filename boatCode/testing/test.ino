@@ -168,6 +168,21 @@ void storeData(int time, Point coords, double distance, int heading, int angle, 
 	return 0;
 }
 
+void altitudeLimiter(){
+  delay(600000); //10 min
+  int groundlvl = gps.altitude.meters();
+  
+  while (gps.altitude.meters() < gps.altitude.meters() + 30){
+    delay(500);
+  }
+
+  while (gps.altitude.meters() > gps.altitude.meters() + 5){
+    delay(500);
+  }
+
+  delay(60000); //1 min
+}
+
 void setup() {
   Serial.begin(9600);
   delay(1000);
@@ -206,6 +221,10 @@ void setup() {
     }
   }
   Serial.println("Boot complete.");
+
+  Serial.println("Holding for altitude...");
+  altitudeLimiter();
+  Serial.println("Loop conditions met. Starting main loop.");
 }
 
 void loop() {
