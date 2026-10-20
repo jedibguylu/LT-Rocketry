@@ -7,7 +7,7 @@ int calcAngle(double boatLat, double boatLon, double targetLat, double targetLon
     //cout << dy << "\n";
 
     // Calculate angle using atan2(y, x)
-    double bearing = atan2(dx, dy) * degConvert;
+    double bearing = (atan2(dx, dy) * degConvert) + 6;
     
     //cout << bearing << "\n";
 
